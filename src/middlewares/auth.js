@@ -1,7 +1,8 @@
 const jwt = require("jsonwebtoken")
 
 const userModel = require("../models/userModel")
-const cartModel = require("../controllers/cartController")
+const cartModel = require("../models/cartModel")
+const mongoose = require("mongoose")
 
 const isValid = function (value) {
     if (typeof value == "undefined" || value == null) return false
@@ -77,7 +78,7 @@ const authorise = async function (req, res, next) {
 
 }
 
-const authoriseInCart = async function (req, res) {
+const authoriseInCart = async function (req, res, next) {
     try {
         userId1 = req.params.userId
 
@@ -91,36 +92,75 @@ const authoriseInCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "userid in path params is not a valid object id" })
         }
 
-        if (!isValid(cartId)) {
-            return res.status(400).send({ status: false, msg: "userid in path parms is not valid" })
-        }
+        
+      
 
-
-        if (!isValidObjectId(cartId)) {
-            return res.status(400).send({ status: false, msg: "userid in path params is not a valid object id" })
-        }
-
-        if (userId1 !== req.decodeToken.userId) {
+        if (userId1 != req.decodeToken.userId) {
             return res.status(403).send({ status: false, msg: "user id does not matches with user credentials" })
 
         }
 
+        if (!isValid(cartId)) {
+            return res.status(400).send({ status: false, msg: "cart id in body is not valid" })
+        }
+
+
+        if (!isValidObjectId(cartId)) {
+            return res.status(400).send({ status: false, msg: "cart  is not a valid object id" })
+        }
+
+        
         const checkCartExist = await cartModel.findById(cartId)
+       
         if (!checkCartExist) {
             return res.status(400).send({ status: false, msg: "cart does not exist for this cart id" })
         }
 
-        if (userId1 !== checkCartExist.userId) {
+
+
+        if (userId1 != checkCartExist.userId) {
             return res.status(403).send({ status: false, msg: "you are trying to access someone else cart" })
 
 
         }
+
+        next()
     } catch (err) {
         return res.status(500).send({ status: false, msg: err.message })
 
     }
 }
 
+
+
+const getCartData = async function(req, res){
+    try{
+       const userId= req.params.userId
+
+        if(!isValid(userId)){
+            return res.status(400).send({status:false, msg : "wrong user id"})
+        }
+
+        if(!isValidObjectId(userId)){
+            return res.status(400).send({status:false, msg:"user id is not a valid object id"})
+
+        }
+
+        const checkCartExist = await cartModel.findOne({userId})
+
+        if(!checkCartExist){
+            return res.status(400).send({status:false, msg : "cart does not exist for this user"})
+        }
+
+        return res.status(200).send({status:true, msg : "here is your cart summary", data : checkCartExist})
+
+
+    
+
+    }catch(err){
+        return res.status(500).send({status:false, msg:err.message})
+    }
+}
 
 module.exports.authentication = authentication
 module.exports.authorise = authorise

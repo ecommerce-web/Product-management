@@ -27,7 +27,7 @@ const createCart = async function (req, res) {
 
         let id = req.params.userId
         let data = req.body
-        console.log(data)
+        // console.log(data)
 
 
         // check id in params is valid or not
@@ -130,10 +130,12 @@ const createCart = async function (req, res) {
                 return res.status(400).send({ status: false, msg: "product is not a valid object id" })
             }
 
-            // const productExist = await productModel.findOne({ _id: items[0].productId, isDeleted: false })
-            // if (!productExist) {
-            //     return res.status(400).send({ status: false, msg: "product id does not exist in our system" })
-            // }
+           
+
+            var price = await productModel.findOne({_id:items[0].productId, isDeleted:false})
+            if(!price){
+                return res.status(400).send({status:false, msg : "Product not in stock right now"})
+            }
 
             obj.items = []
 
@@ -270,25 +272,6 @@ const updateCart = async function(req, res){
             }
 
         }
-
-
-
-
-
-        
-
-        
-
-
-
-        
-
-
-
-
-
-
-
     }catch(err){
         return res.status(500).send({status: false, msg:err.message})
     }
@@ -298,21 +281,74 @@ const updateCart = async function(req, res){
 
 
 
+const getCartData = async function(req, res){
+    try{
+       const userId= req.params.userId
+
+        if(!isValid(userId)){
+            return res.status(400).send({status:false, msg : "wrong user id"})
+        }
+
+        if(!isValidObjectId(userId)){
+            return res.status(400).send({status:false, msg:"user id is not a valid object id"})
+
+        }
+
+        const checkCartExist = await cartModel.findOne({userId})
+
+        if(!checkCartExist){
+            return res.status(400).send({status:false, msg : "cart does not exist for this user"})
+        }
+
+        return res.status(200).send({status:true, msg : "here is your cart summary", data : checkCartExist})
+
+
+    
+
+    }catch(err){
+        return res.status(500).send({status:false, msg:err.message})
+    }
+}
+
+
+
+const deleteCart = async function(req, res){
+    try{
+        userId = req.params.userId
+
+        if(!isValid(userId)){
+            return res.status(400).send({status:false, msg : "wrong user id"})
+        }
+
+        if(!isValidObjectId(userId)){
+            return res.status(400).send({status:false, msg:"user id is not a valid object id"})
+
+        }
+
+        const checkCartExist = await cartModel.findOneAndUpdate(
+            {userId:userId},
+            {$set : {items : [] , totalItems:0, totalPrice:0}},
+            {new:true}
+        )
+
+        if(!checkCartExist){
+            return res.status(400).send({status:false, msg : "cart does not exist for this user"})
+        }
+
+        return res.status(200).send({status:false, msg : "cart deleted", data:checkCartExist})
 
 
 
 
 
-
-
-
-
-
-
-
-
+    }catch(err){
+        return res.status(500).send({status:false, msg : err.message})
+    }
+}
 
 
 
 module.exports.createCart = createCart
 module.exports.updateCart=updateCart
+module.exports.getCartData=getCartData
+module.exports.deleteCart=deleteCart

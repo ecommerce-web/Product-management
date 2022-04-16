@@ -37,7 +37,12 @@ router.put("/products/:productId", productController.updateProductDetails)
 //cart API's
 
 router.post("/users/:userId/cart", middleware.authentication, middleware.authorise , cartController.createCart)
-router.put("/users/:userId/cart", cartController.updateCart)
+
+router.put("/users/:userId/cart", middleware.authentication, middleware.authoriseInCart, cartController.updateCart)
+
+router.get("/users/:userId/cart", middleware.authentication, middleware.authorise, cartController.getCartData)
+
+router.delete("/users/:userId/cart", middleware.authentication, middleware.authorise, cartController.deleteCart)
 
 
 
