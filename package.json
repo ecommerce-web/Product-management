@@ -140,7 +140,7 @@
     "moment": "^2.29.1",
     "mongodb": "^4.3.1",
     "mongodb-connection-string-url": "^2.5.2",
-    "mongoose": "^6.2.10",
+    "mongoose": "^6.2.11",
     "mpath": "^0.8.4",
     "mquery": "^4.0.2",
     "ms": "^2.0.0",

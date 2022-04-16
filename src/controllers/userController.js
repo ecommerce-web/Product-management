@@ -66,16 +66,13 @@ const userProfile = async function (req, res) {
 
         let files = req.files
         let data = req.body
-        // console.log(data)
+
         if (files && files.length > 0 && Object.keys(data).length > 0) {
 
             let obj = {}
 
             let { fname, lname, email, phone, password, address } = data
             address = JSON.parse(address)
-
-            console.log(typeof (fname))
-
 
 
             // userName validation
@@ -104,7 +101,6 @@ const userProfile = async function (req, res) {
             }
 
             const isEmailalredyUsed = await userModel.findOne({ email }) //{email :email} object shorthand property
-            //console.log(isEmailalredyUsed)
             if (isEmailalredyUsed) {
                 return res.status(400).send({ status: false, msg: "email already in use" })
 
@@ -120,9 +116,9 @@ const userProfile = async function (req, res) {
                 return res.status(400).send({ status: false, msg: "phone is not valid/phone is missing" })
             }
 
-            // if (phone.length != 10) {
-            //     return res.status(400).send({ status: false, msg: "phone length needs to be of 10 digit" })
-            // }
+            if (phone.length != 10) {
+                return res.status(400).send({ status: false, msg: "phone length needs to be of 10 digit" })
+            }
 
             if (!/^[6-9]{1}[0-9]{9}$/.test(phone)) {
                 return res.status(400).send({ status: false, msg: "phone should be valid phone number" })
@@ -149,6 +145,8 @@ const userProfile = async function (req, res) {
             const securePassword = await bcrypt.hash(password, 10);
 
             obj.password = securePassword
+
+
             // address validation -----------------------------------------------------
 
 
@@ -157,13 +155,7 @@ const userProfile = async function (req, res) {
 
             }
 
-
-
             let { shipping, billing } = address
-            console.log(typeof (shipping.street))
-
-
-
 
             // shipping address ------------------------------------------------------
 
@@ -223,8 +215,16 @@ const userProfile = async function (req, res) {
             obj.address.billing.city = billing.city
             obj.address.billing.pincode = billing.pincode
 
-            // console.log(obj)
 
+
+
+            // files validation(image validation)
+
+            let fileFormat = files[0].mimetype.split('/')
+
+            if (fileFormat.indexOf('image') === -1) {
+                return res.status(400).send({ status: false, msg: "you can only upload jpg/png/jpeg types of file" })
+            }
 
             let uploadFileUrl = await uploadFile(files[0])
 
@@ -234,8 +234,6 @@ const userProfile = async function (req, res) {
             }
 
             obj.profileImage = uploadFileUrl
-
-            // console.log(obj)
 
             const userCreated = await userModel.create(obj)
 
@@ -346,9 +344,9 @@ const updateUserProfile = async function (req, res) {
         userId = req.params.userId
         let files = req.files
         let data = req.body
-        console.log(data.address.shipping)
 
-        if (files && files.length == 0 && Object.keys(data).length > 0) {
+
+        if (!files && Object.keys(data).length === 0) {
             return res.status(400).send({ status: false, msg: "Nothing to update" })  // needs to hndle this
         }
 
@@ -357,9 +355,11 @@ const updateUserProfile = async function (req, res) {
             return res.status(400).send({ status: false, msg: "user Id is not Valid" })
         }
 
+
         let obj = {}
 
-        let { fname, lname, email, phone, password, address } = data
+        var { fname, lname, email, phone, password, address } = data
+        console.log(address)
 
         if (fname) {
             if (!isValid(fname)) {
@@ -427,90 +427,100 @@ const updateUserProfile = async function (req, res) {
         }
 
 
-       
-        // console.log(obj)
         if (address) {
             let { shipping, billing } = address
-            obj.address={}
+            obj.address = {}
             // console.log(obj)
 
             if (shipping) {
-                obj.address.shipping={}
+                obj.address.shipping = {}
                 // console.log(address.shipping)
-            
+
 
                 if (address.shipping.street) {
                     if (!isValid(address.shipping.street)) {
                         return res.status(400).send({ status: false, msg: "shipping street is not valid" })
                     }
                     obj.address.shipping.street = address.shipping.street
+                    var shippingStreet = address.shipping.street
                 }
                 if (address.shipping.city) {
                     if (!isValid(address.shipping.city)) {
                         return res.status(400).send({ status: false, msg: "shipping city is not valid" })
                     }
                     obj.address.shipping.city = address.shipping.city
+                    var shippingCity = address.shipping.city
                 }
                 if (address.shipping.pincode) {
                     if (!isValid(address.shipping.pincode)) {
                         return res.status(400).send({ status: false, msg: "shipping pincode is not valid" })
                     }
                     obj.address.shipping.pincode = address.shipping.pincode
+                    var shippingpincode = address.shipping.pincode
                 }
 
             }
 
-            // console.log(obj)
-            console.log("------")
 
-            
+
             if (billing) {
-                obj.address.billing={}
+                obj.address.billing = {}
                 // console.log(obj)
                 if (address.billing.street) {
                     if (!isValid(address.billing.street)) {
                         return res.status(400).send({ status: false, msg: "billing street is not valid" })
                     }
                     obj.address.billing.street = address.billing.street
+                    var billingStreet = address.billing.street
                 }
                 if (address.billing.city) {
                     if (!isValid(address.billing.city)) {
                         return res.status(400).send({ status: false, msg: "billing city is not valid" })
                     }
                     obj.address.billing.city = address.billing.city
+                    var billingCity = address.billing.city
                 }
                 if (address.billing.pincode) {
                     if (!isValid(address.billing.pincode)) {
                         return res.status(400).send({ status: false, msg: "billing pincode is not valid" })
                     }
                     obj.address.billing.pincode = address.billing.pincode
+                    var billingPincode = address.billing.pincode
                 }
 
             }
         }
 
-        console.log(obj)
+        if (files && files.length > 0) {
 
-        if (files) {
-            let uploadFileUrl = await uploadFile(files[0])
+            let fileFormat = files[0].mimetype.split('/')
 
-            // let isimgeLinkUnique = await userModel.findOne({ profileImage: uploadFileUrl })
-            // if (isimgeLinkUnique) {
-            //     return res.status(400).send({ status: false, msg: "image already in use" })
-            // }
+            if (fileFormat.indexOf('image') === -1) {
+                return res.status(400).send({ status: false, msg: "you can only upload jpg/png/jpeg types of file" })
+            }
+
+            var uploadFileUrl = await uploadFile(files[0])
+            let isimgeLinkUnique = await userModel.findOne({ profileImage: uploadFileUrl })
+            if (isimgeLinkUnique) {
+                return res.status(400).send({ status: false, msg: "image already in use" })
+            }
 
             obj.profileImage = uploadFileUrl
 
         }
 
+
+
+
         console.log(obj)
+
 
         const updateData = await userModel.findOneAndUpdate(
             { _id: userId },
-            { $set: obj },
+            { $set: { fname: fname, lname: lname, email: email, phone: phone, password: password, profileImage: uploadFileUrl, "address.shipping.city" : shippingCity, "address.shipping.street":shippingStreet,"address.shipping.pincode" :shippingpincode,"address.billing.city" : billingCity, "address.billing.street":billingStreet,"address.billing.pincode" : billingPincode } },
+            // {$set : obj},
             { new: true }
         )
-
         return res.status(201).send({ status: false, msg: "User profile Updated", data: updateData })
 
     } catch (err) {
