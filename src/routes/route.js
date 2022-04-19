@@ -5,6 +5,7 @@ const userController = require("../controllers/userController")
 const middleware = require("../middlewares/auth")
 const productController = require("../controllers/productController")
 const cartController = require("../controllers/cartController")
+const orderController = require("../controllers/orderController")
 
 router.get("/test-me", function(req, res){
     res.send({status : true, msg : "working"})
@@ -43,6 +44,12 @@ router.put("/users/:userId/cart", middleware.authentication, middleware.authoris
 router.get("/users/:userId/cart", middleware.authentication, middleware.authorise, cartController.getCartData)
 
 router.delete("/users/:userId/cart", middleware.authentication, middleware.authorise, cartController.deleteCart)
+
+
+
+router.post("/users/:userId/orders", middleware.authentication, middleware.authorise, orderController.checkoutOrder)
+
+router.put("/users/:userId/orders", middleware.authentication, middleware.authorise, orderController.updateYourOrderStatus)
 
 
 

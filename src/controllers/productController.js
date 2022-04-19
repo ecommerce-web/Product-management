@@ -1,4 +1,4 @@
-const removeUploadedFiles = require('multer/lib/remove-uploaded-files');
+// const removeUploadedFiles = require('multer/lib/remove-uploaded-files');
 const aws = require("aws-sdk");
 const mongoose = require("mongoose")
 const jwt = require("jsonwebtoken")
@@ -7,9 +7,9 @@ const productModel = require("../models/productModel");
 // const { address } = require('ip');
 
 const bcrypt = require("bcrypt");
-const { fn } = require('moment');
-const { address } = require('ip');
-const { RFC_2822 } = require('moment');
+
+// const { address } = require('ip');
+// const { RFC_2822 } = require('moment');
 
 aws.config.update(
     {

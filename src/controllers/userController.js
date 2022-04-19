@@ -72,7 +72,7 @@ const userProfile = async function (req, res) {
             let obj = {}
 
             let { fname, lname, email, phone, password, address } = data
-            address = JSON.parse(address)
+            
 
 
             // userName validation
@@ -154,6 +154,8 @@ const userProfile = async function (req, res) {
                 return res.status(400).send({ status: false, msg: "Address is not valid" })
 
             }
+
+            address = JSON.parse(address)
 
             let { shipping, billing } = address
 
