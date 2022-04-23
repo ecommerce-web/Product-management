@@ -16,11 +16,13 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: true,
         unique: true,
+        lowercase:true,
         trim: true,
         validate: {
             validator: function (email) {
                 return /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/.test(email)
-            }, message: 'Please fill a  valid email address', isAsync: false
+            }, message: 'Please fill a  valid email address', 
+            isAsync: false
 
         }
     },
@@ -44,8 +46,7 @@ const userSchema = new mongoose.Schema({
     password: {
         type: String,
         required: true,
-        // minlength: [8, "min pssword length should be 8"],
-        // maxlength: [15, "max password length should be 15"]
+      
 
     },
     address: {

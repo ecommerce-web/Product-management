@@ -35,6 +35,11 @@ const createCart = async function (req, res) {
             return res.status(400).send({ status: false, msg: "user Id in params is not in valid format" })
         }
 
+        const checkIfUserExist = await userModel.findById(id)
+        if(!checkIfUserExist){
+            return res.status(400).send({status:false, msg:"User does not exist in our sysytem"})
+        }
+
 
         // check body is there
         if (Object.keys(data).length === 0) {
@@ -45,12 +50,11 @@ const createCart = async function (req, res) {
         let obj = {}
 
 
-        const { productId, totalPrice, totalItems } = data /// destructuring the whole data inside body
+        const { productId, cartId } = data /// destructuring the whole data inside body
 
         // userId Validations
 
-    
-
+        //check cart exist or not
         const usersCartAlreadyExist = await cartModel.findOne({ userId: id })
 
 
@@ -262,7 +266,7 @@ const updateCart = async function (req, res) {
 
             )
 
-            return res.status(400).send({ status: false, msg: "product removed from the cart", data: changeInCart })
+            return res.status(200).send({ status: false, msg: "product removed from the cart", data: changeInCart })
 
         } else {
             if (qt > 1) {
@@ -272,7 +276,7 @@ const updateCart = async function (req, res) {
                     { new: true }
                 )
 
-                return res.status(400).send({ status: false, msg: "Qunatity decreased from the cart", data: changeInCart })
+                return res.status(200).send({ status: false, msg: "Qunatity decreased from the cart", data: changeInCart })
             } else {
                 const changeInCart = await cartModel.findOneAndUpdate(
                     { _id: cartId },
@@ -280,7 +284,7 @@ const updateCart = async function (req, res) {
                     { new: true }
 
                 )
-                return res.status(400).send({ status: false, msg: "Qunatity decreased from the cart", data: changeInCart })
+                return res.status(200).send({ status: false, msg: "Qunatity decreased from the cart", data: changeInCart })
 
             }
 
